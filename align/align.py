@@ -175,6 +175,28 @@ class NeedlemanWunsch:
         score, the seqA alignment and the seqB alignment respectively.
         """
         # Implement this method based upon the heuristic chosen in the align method above.
+        row_ind = len(seqA) + 1
+        column_ind = len(seqB) + 1
+        optimal_choices = []
+
+        while row_ind !=0 and column_ind !=0:
+            choices = [self._align_matrix[row_ind,column_ind],self._gapA_matrix[row_ind,column_ind],self._gapB_matrix[row_ind,column_ind]]
+            optimal_choice = max(choices)
+            optimal_choices.append(optimal_choice)
+
+            if choices.index(optimal_choice) == 0:
+                row_ind -= 1
+                column_ind -= 1
+
+
+            elif choices.index(optimal_choice) == 1:
+                row_ind -= 1
+
+            else:
+                column_ind -= 1
+
+
+        self.alignment_score = sum(optimal_choices)
         pass
 
 
