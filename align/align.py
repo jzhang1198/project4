@@ -135,28 +135,28 @@ class NeedlemanWunsch:
             self._gapA_matrix[row_ind,0] = self.gap_open + (self.gap_extend * row_ind)
 
         for column_ind in range(0,len(seqB)+1):
-            self._gapB_matrix[0,column_ind] = self.gap_open + (self.gap_extend * row_ind)
+            self._gapB_matrix[0,column_ind] = self.gap_open + (self.gap_extend * column_ind)
 
         self._align_matrix[0,0] = 0
 
-        # Fill out entries for _align matrix
-        for column_ind in range(1,len(seqB)+1):
+        # Fill out entries for gapA, _gapB, and _align matrices
+        for column_ind in range(1,len(seqB)+1): #loop through columns and rows
             for row_ind in range(1,len(seqA)+1):
                 seqA_BP = seqA[row_ind]
-                seqB_BP = seqB[row_ind]
-                match_score = self.sub_dict[(seqA_BP,seqB_BP)]
+                seqB_BP = seqB[column_ind]
+                match_score = self.sub_dict[(seqA_BP,seqB_BP)] #compute match score
 
-                align_matrix_options = [self._align_matrix[row_ind-1,column_ind-1],
+                align_matrix_options = [self._align_matrix[row_ind-1,column_ind-1], #compute value for align_matrix[row_ind,column_ind]
                                         self._gapA_matrix[row_ind-1,column_ind-1],
                                         self._gapB_matrix[row_ind-1,column_ind-1]]
                 self._align_matrix[row_ind,column_ind] = match_score + max(align_matrix_options)
 
-                gapA_matrix_options = [self.gap_open + self.gap_extend + self.align_matrix[row_ind,column_ind-1],
+                gapA_matrix_options = [self.gap_open + self.gap_extend + self.align_matrix[row_ind,column_ind-1], #compute value for _gapA_matrix[row_ind,column_ind]
                                         self.gap_extend + self._gapA_matrix[row_ind,column_ind-1],
                                         self.gap_start + self.gap_extend + self._gapB_matrix[row_ind,column_ind-1]]
                 self._gapA_matrix[row_ind,column_ind] = max(gapA_matrix_options)
 
-                gapB_matrix_options = [self.gap_open + self.gap_extend + self.align_matrix[row_ind-1,column_ind],
+                gapB_matrix_options = [self.gap_open + self.gap_extend + self.align_matrix[row_ind-1,column_ind], #compute value for _gapB_matrix[row_ind,column_ind]
                                         self.gap_open + self.gap_extend + self._gapA_matrix[row_ind-1,column_ind],
                                         self.gap_extend + self._gapB_matrix[row_ind-1,column_ind]]
                 self._gapB_matrix[row_ind,column_ind] = max(gapB_matrix_options)
@@ -177,26 +177,33 @@ class NeedlemanWunsch:
         # Implement this method based upon the heuristic chosen in the align method above.
         row_ind = len(seqA) + 1
         column_ind = len(seqB) + 1
-        optimal_choices = []
+        #optimal_choices = []
+        seqA_align = ""
+        seqB_align = ""
 
         while row_ind !=0 and column_ind !=0:
             choices = [self._align_matrix[row_ind,column_ind],self._gapA_matrix[row_ind,column_ind],self._gapB_matrix[row_ind,column_ind]]
             optimal_choice = max(choices)
-            optimal_choices.append(optimal_choice)
+            #optimal_choices.append(optimal_choice)
 
             if choices.index(optimal_choice) == 0:
+                seqA_align.append(self.seqA[row_ind])
+                seqB_align.append(self.seqB[column_ind])
                 row_ind -= 1
                 column_ind -= 1
 
-
             elif choices.index(optimal_choice) == 1:
+                seqA_align.append(self.seqA[row_ind])
+                seqB_align.append('-')
                 row_ind -= 1
 
             else:
+                seqB_align.append(self.seqB[row_ind])
+                seqA_align.append('-')
                 column_ind -= 1
 
 
-        self.alignment_score = sum(optimal_choices)
+        #self.alignment_score = sum(optimal_choices)
         pass
 
 
