@@ -100,13 +100,19 @@ class NeedlemanWunsch:
 
     def align(self, seqA: str, seqB: str) -> Tuple[float, str, str]:
         """
-        # TODO: Fill in the Needleman-Wunsch Algorithm below
-        to perform global sequence alignment of seqA and seqB
-        and return a tuple with the following format
-        (alignment score, seqA alignment, seqB alignment)
-        Also, write up a docstring for this function using the
-        _read_sub_matrix as an example.
-        Don't forget to comment your code!
+        This function takes in two sequences as inputs and outputs their alignment
+        and the corresponding alignment score.
+
+        Parameters:
+            seqA: str
+                A parsed fasta sequence
+            seqB: str
+                Also a parsed fasta sequence
+
+        Returns:
+            self._backtrace()
+                A tuple comprised of the alignment score and the alignments for
+                input sequences. 
         """
         # Initialize 6 matrix private attributes for use in alignment
         # create matrices for alignment scores and gaps
@@ -151,17 +157,17 @@ class NeedlemanWunsch:
                                         self._gapB_matrix[row_ind-1,column_ind-1]]
                 self._align_matrix[row_ind,column_ind] = match_score + max(align_matrix_options)
 
-                gapA_matrix_options = [self.gap_open + self.gap_extend + self._align_matrix[row_ind,column_ind-1], #compute value for _gapA_matrix[row_ind,column_ind]
-                                        self.gap_extend + self._gapA_matrix[row_ind,column_ind-1],
-                                        self.gap_open + self.gap_extend + self._gapB_matrix[row_ind,column_ind-1]]
+                gapA_matrix_options = [self.gap_open + self.gap_extend + self._align_matrix[row_ind-1,column_ind], #compute value for _gapA_matrix[row_ind,column_ind]
+                                        self.gap_extend + self._gapA_matrix[row_ind-1,column_ind],
+                                        self.gap_open + self.gap_extend + self._gapB_matrix[row_ind-1,column_ind]]
                 self._gapA_matrix[row_ind,column_ind] = max(gapA_matrix_options)
 
-                gapB_matrix_options = [self.gap_open + self.gap_extend + self._align_matrix[row_ind-1,column_ind], #compute value for _gapB_matrix[row_ind,column_ind]
-                                        self.gap_open + self.gap_extend + self._gapA_matrix[row_ind-1,column_ind],
-                                        self.gap_extend + self._gapB_matrix[row_ind-1,column_ind]]
+                gapB_matrix_options = [self.gap_open + self.gap_extend + self._align_matrix[row_ind,column_ind-1], #compute value for _gapB_matrix[row_ind,column_ind]
+                                        self.gap_open + self.gap_extend + self._gapA_matrix[row_ind,column_ind-1],
+                                        self.gap_extend + self._gapB_matrix[row_ind,column_ind-1]]
                 self._gapB_matrix[row_ind,column_ind] = max(gapB_matrix_options)
 
-        return self._backtrace()
+        return self._backtrace() #implement backtrace to find alignment and alignment score
 
     def _backtrace(self) -> Tuple[float, str, str]:
         """
@@ -170,39 +176,35 @@ class NeedlemanWunsch:
         The traceback method should return a tuple of the alignment
         score, the seqA alignment and the seqB alignment respectively.
         """
-        # Implement this method based upon the heuristic chosen in the align method above.
-        row_ind = len(self._seqA) + 1
-        column_ind = len(self._seqB) + 1
-        #optimal_choices = []
+
+        row_ind = len(self._seqA) #find the maximum row and column indices
+        column_ind = len(self._seqB)
+
         seqA_align = ""
         seqB_align = ""
 
-        alignment_score = self._align_matrix[row_ind,column_ind]
+        alignment_score = self._align_matrix[row_ind,column_ind] #compute alignment score
 
         while row_ind !=0 and column_ind !=0:
-            choices = [self._align_matrix[row_ind,column_ind],self._gapA_matrix[row_ind,column_ind],self._gapB_matrix[row_ind,column_ind]]
-            optimal_choice = max(choices)
-            #optimal_choices.append(optimal_choice)
+            choices = [self._align_matrix[row_ind,column_ind],self._gapA_matrix[row_ind,column_ind],self._gapB_matrix[row_ind,column_ind]] #determine possible choices for backtracking
+            optimal_choice = max(choices) #determine the optimum choice
 
-            if choices.index(optimal_choice) == 0:
-                seqA_align.append(self._seqA[row_ind])
-                seqB_align.append(self._seqB[column_ind])
+            if choices.index(optimal_choice) == 0: #if the optimum choice was the value for _align_matrix, move diagonally and align residues
+                seqA_align += self._seqA[row_ind-1]
+                seqB_align += self._seqB[column_ind-1]
                 row_ind -= 1
                 column_ind -= 1
 
-
-            elif choices.index(optimal_choice) == 1:
-                seqA_align.append(self._seqA[row_ind])
-                seqB_align.append('-')
+            elif choices.index(optimal_choice) == 1: #if the optimum choice was the value for _gapA_matrix, move up and produce a gap in sequence B alignment
+                seqA_align += self._seqA[row_ind-1]
+                seqB_align += '-'
                 row_ind -= 1
 
-            else:
-                seqB_align.append(self._seqB[row_ind])
-                seqA_align.append('-')
+            else: #if the optimum choice was the value for _gapB_matrix, move to the left and produce a gap in sequence A alignment
+                seqB_align += self._seqB[column_ind-1]
+                seqA_align += '-'
                 column_ind -= 1
 
-
-        #self.alignment_score = sum(optimal_choices)
         return (alignment_score, seqA_align, seqB_align)
 
 def read_fasta(fasta_file: str) -> Tuple[str, str]:
