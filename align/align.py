@@ -142,8 +142,8 @@ class NeedlemanWunsch:
         # Fill out entries for gapA, _gapB, and _align matrices
         for column_ind in range(1,len(seqB)+1): #loop through columns and rows
             for row_ind in range(1,len(seqA)+1):
-                seqA_BP = seqA[row_ind]
-                seqB_BP = seqB[column_ind]
+                seqA_BP = seqA[row_ind-1]
+                seqB_BP = seqB[column_ind-1]
                 match_score = self.sub_dict[(seqA_BP,seqB_BP)] #compute match score
 
                 align_matrix_options = [self._align_matrix[row_ind-1,column_ind-1], #compute value for align_matrix[row_ind,column_ind]
@@ -151,19 +151,15 @@ class NeedlemanWunsch:
                                         self._gapB_matrix[row_ind-1,column_ind-1]]
                 self._align_matrix[row_ind,column_ind] = match_score + max(align_matrix_options)
 
-                gapA_matrix_options = [self.gap_open + self.gap_extend + self.align_matrix[row_ind,column_ind-1], #compute value for _gapA_matrix[row_ind,column_ind]
+                gapA_matrix_options = [self.gap_open + self.gap_extend + self._align_matrix[row_ind,column_ind-1], #compute value for _gapA_matrix[row_ind,column_ind]
                                         self.gap_extend + self._gapA_matrix[row_ind,column_ind-1],
-                                        self.gap_start + self.gap_extend + self._gapB_matrix[row_ind,column_ind-1]]
+                                        self.gap_open + self.gap_extend + self._gapB_matrix[row_ind,column_ind-1]]
                 self._gapA_matrix[row_ind,column_ind] = max(gapA_matrix_options)
 
-                gapB_matrix_options = [self.gap_open + self.gap_extend + self.align_matrix[row_ind-1,column_ind], #compute value for _gapB_matrix[row_ind,column_ind]
+                gapB_matrix_options = [self.gap_open + self.gap_extend + self._align_matrix[row_ind-1,column_ind], #compute value for _gapB_matrix[row_ind,column_ind]
                                         self.gap_open + self.gap_extend + self._gapA_matrix[row_ind-1,column_ind],
                                         self.gap_extend + self._gapB_matrix[row_ind-1,column_ind]]
                 self._gapB_matrix[row_ind,column_ind] = max(gapB_matrix_options)
-
-
-
-        pass
 
         return self._backtrace()
 
@@ -175,11 +171,13 @@ class NeedlemanWunsch:
         score, the seqA alignment and the seqB alignment respectively.
         """
         # Implement this method based upon the heuristic chosen in the align method above.
-        row_ind = len(seqA) + 1
-        column_ind = len(seqB) + 1
+        row_ind = len(self._seqA) + 1
+        column_ind = len(self._seqB) + 1
         #optimal_choices = []
         seqA_align = ""
         seqB_align = ""
+
+        alignment_score = self._align_matrix[row_ind,column_ind]
 
         while row_ind !=0 and column_ind !=0:
             choices = [self._align_matrix[row_ind,column_ind],self._gapA_matrix[row_ind,column_ind],self._gapB_matrix[row_ind,column_ind]]
@@ -187,25 +185,25 @@ class NeedlemanWunsch:
             #optimal_choices.append(optimal_choice)
 
             if choices.index(optimal_choice) == 0:
-                seqA_align.append(self.seqA[row_ind])
-                seqB_align.append(self.seqB[column_ind])
+                seqA_align.append(self._seqA[row_ind])
+                seqB_align.append(self._seqB[column_ind])
                 row_ind -= 1
                 column_ind -= 1
 
+
             elif choices.index(optimal_choice) == 1:
-                seqA_align.append(self.seqA[row_ind])
+                seqA_align.append(self._seqA[row_ind])
                 seqB_align.append('-')
                 row_ind -= 1
 
             else:
-                seqB_align.append(self.seqB[row_ind])
+                seqB_align.append(self._seqB[row_ind])
                 seqA_align.append('-')
                 column_ind -= 1
 
 
         #self.alignment_score = sum(optimal_choices)
-        pass
-
+        return (alignment_score, seqA_align, seqB_align)
 
 def read_fasta(fasta_file: str) -> Tuple[str, str]:
     """
