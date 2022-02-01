@@ -19,7 +19,7 @@ def test_nw_alignment():
     gap_extend = -1
 
     f = NeedlemanWunsch("./substitution_matrices/BLOSUM62.mat",gap_open,gap_extend)
-    alignment_score,seq1_align,seq2_align = f.align()
+    alignment_score,seq1_align,seq2_align = f.align(seq1,seq2)
 
     #assert that the base cases for _align_matrix are correct
     assert f._align_matrix[0,0] == 0
@@ -56,7 +56,7 @@ def test_nw_backtrace():
     gap_extend = -1
 
     f = NeedlemanWunsch("./substitution_matrices/BLOSUM62.mat",gap_open,gap_extend)
-    alignment_score,seq3_align,seq4_align = f.align()
+    alignment_score,seq3_align,seq4_align = f.align(seq3,seq4)
 
     #assert that backtrace returned the correct alignment and alignment score
     assert alignment_score == 17
