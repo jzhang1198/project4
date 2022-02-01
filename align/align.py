@@ -1,7 +1,6 @@
 # Importing Dependencies
 import numpy as np
 from typing import Tuple
-from os import listdir
 
 # Defining class for Needleman-Wunsch Algorithm for Global pairwise alignment
 class NeedlemanWunsch:
