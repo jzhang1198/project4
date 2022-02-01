@@ -112,7 +112,7 @@ class NeedlemanWunsch:
         Returns:
             self._backtrace()
                 A tuple comprised of the alignment score and the alignments for
-                input sequences. 
+                input sequences.
         """
         # Initialize 6 matrix private attributes for use in alignment
         # create matrices for alignment scores and gaps
@@ -205,7 +205,7 @@ class NeedlemanWunsch:
                 seqA_align += '-'
                 column_ind -= 1
 
-        return (alignment_score, seqA_align, seqB_align)
+        return (alignment_score, seqA_align[::-1], seqB_align[::-1])
 
 def read_fasta(fasta_file: str) -> Tuple[str, str]:
     """

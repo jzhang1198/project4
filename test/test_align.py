@@ -14,7 +14,32 @@ def test_nw_alignment():
     """
     seq1, _ = read_fasta("./data/test_seq1.fa")
     seq2, _ = read_fasta("./data/test_seq2.fa")
-    pass
+
+    gap_open = -10
+    gap_extend = -1
+
+    f = NeedlemanWunsch("./substitution_matrices/BLOSUM62.mat",gap_open,gap_extend)
+    alignment_score,seq1_align,seq2_align = f.align()
+
+    #assert that the base cases for _align_matrix are correct
+    assert f._align_matrix[0,0] == 0
+    assert set(f._align_matrix[0,1:]) == {-np.inf} and set(f._align_matrix[1:,0]) == {-np.inf}
+
+    #assert that the base cases for _gapA_matrix are correct
+    assert set(f._gapA_matrix[:,0] == np.linspace(-10,-14,5)) == {True}
+    assert set(f._gapA_matrix[0,1:]) == {-np.inf}
+
+    #assert that the base cases for _gapB_matrix are correct
+    assert set(f._gapB_matrix[0,:] == np.linspace(-10,-13,4)) == {True}
+    assert set(f._gapB_matrix[1:,0]) == {-np.inf}
+
+    #assert that a handful of representative elements are correct
+    assert f._align_matrix[1,1] == 5
+    assert f._gapA_matrix[1,1] == -22
+    assert f._gapB_matrix[1,1] == -22
+    assert f._align_matrix[1,2] == -11
+    assert f._gapA_matrix[1,2] == -23
+    assert f._gapB_matrix[1,2] == -6
 
 def test_nw_backtrace():
     """
@@ -26,8 +51,14 @@ def test_nw_backtrace():
     """
     seq3, _ = read_fasta("./data/test_seq3.fa")
     seq4, _ = read_fasta("./data/test_seq4.fa")
-    pass
 
+    gap_open = -10
+    gap_extend = -1
 
+    f = NeedlemanWunsch("./substitution_matrices/BLOSUM62.mat",gap_open,gap_extend)
+    alignment_score,seq3_align,seq4_align = f.align()
 
-
+    #assert that backtrace returned the correct alignment and alignment score
+    assert alignment_score == 17
+    assert seq3_align == 'MAVHQLIRRP'
+    assert seq4_align == 'M---QLIRHP'
